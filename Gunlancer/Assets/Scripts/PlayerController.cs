@@ -47,9 +47,6 @@ public class PlayerController : MonoBehaviour
                     (Keyboard.current.iKey.isPressed ? 1 : 0) - (Keyboard.current.kKey.isPressed ? 1 : 0));
             }
 
-            // normalize diagonal movement
-            //if (moveInput.magnitude > 1)
-                //moveInput.Normalize();
         }
 
         rb.linearVelocity = moveInput * moveSpeed;
