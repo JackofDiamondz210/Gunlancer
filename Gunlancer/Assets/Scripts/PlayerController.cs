@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
                 moveInput = Gamepad.current.rightStick.ReadValue();
             }
 
+            //had chatgpt help with getting both players to share one controller
             if (isPlayerOne)
             {
                 moveInput += new Vector2(
