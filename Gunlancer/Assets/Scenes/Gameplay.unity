@@ -458,7 +458,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 50}
-  m_LocalScale: {x: 1000, y: 1000, z: 1}
+  m_LocalScale: {x: 300, y: 200, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1973,9 +1973,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2072423183}
     - target: {fileID: 1802578123106239532, guid: f5c713f9caad2ec47b165bc5852911d0, type: 3}
+      propertyPath: isPlayerOne
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1802578123106239532, guid: f5c713f9caad2ec47b165bc5852911d0, type: 3}
       propertyPath: bulletPrefab
       value: 
       objectReference: {fileID: 7539546125581780438, guid: 696658cf6f493ca4f9e99eaf7cb610b8, type: 3}
+    - target: {fileID: 3728334116611317614, guid: f5c713f9caad2ec47b165bc5852911d0, type: 3}
+      propertyPath: m_NeverAutoSwitchControlSchemes
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4004590215177600014, guid: f5c713f9caad2ec47b165bc5852911d0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6

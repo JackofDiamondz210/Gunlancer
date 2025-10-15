@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 
 public class PlayerController : MonoBehaviour
 {
-
+    //getting settings for player movement and rigidbody, flag for player one, and setting up firing for player 1 and 2
     [SerializeField] private float moveSpeed = 10f;
     private float originalMoveSpeed = 10f;
     private Rigidbody2D rb;
@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //getting players rigidbody
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -27,6 +28,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
 
+        // Controller movement support
         if (Gamepad.current != null) // make sure a controller is connected
         {
             if (isPlayerOne)
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour
                 moveInput = Gamepad.current.rightStick.ReadValue();
             }
 
-            //had chatgpt help with getting both players to share one controller and Keyboard
+            //had chatgpt help with getting keyboard support to work simultaneously with controller
             if (isPlayerOne)
             {
                 moveInput += new Vector2(
@@ -56,34 +58,39 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        //moving the player when player inputs an action
         rb.linearVelocity = moveInput * moveSpeed;
 
     }
 
+    // moving the player appropriatly with input action
     public void Move(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
         Debug.Log($"{gameObject.name} got input: {moveInput}");
     }
 
+    // Firing a bullet prefab when appropriate fire button is performed
     public void Fire(InputAction.CallbackContext context)
     {
+
         if (context.performed)
         {
+            //if player one flag is checked on fires right if not, left 
             Vector2 direction = isPlayerOne ? Vector2.right : Vector2.left;
 
             GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
             Bullet bulletScript = bullet.GetComponent<Bullet>();
-            if (bulletScript != null)
-            {
-                bulletScript.Launch(direction);
-            }
 
+            bulletScript.Launch(direction);
 
+            //checking you is firing
+            //Debug.Log(isPlayerOne ? "P1 fire" : "P2 fire");
         }
     }
 
+    //When hit with a bullet tagged object player will be stunned for 5 seconds
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
@@ -92,6 +99,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Will stop players movement for 5 seconds 
     private IEnumerator DisableMovement(float duration)
     {
         moveSpeed = 0;
