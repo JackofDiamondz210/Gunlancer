@@ -155,7 +155,6 @@ public class PlayerController : MonoBehaviour
                 Destroy(collision.gameObject); // shield blocks bullet
                 return;
             }
-            bool isStunned = true;
             StartCoroutine(DisableMovement(5f));
             Destroy(collision.gameObject);
         }
