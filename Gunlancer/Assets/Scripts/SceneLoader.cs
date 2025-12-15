@@ -8,17 +8,19 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SceneLoader : MonoBehaviour
 {
+    //start button
     public void StartGameButton()
     {
         SceneManager.LoadScene("Gameplay");
     }
 
+    //main menu button
     public void Restart()
     {
         SceneManager.LoadScene("Menu");
     }
 
-
+    //quit
     public void QuitGame()
     {
         Application.Quit();

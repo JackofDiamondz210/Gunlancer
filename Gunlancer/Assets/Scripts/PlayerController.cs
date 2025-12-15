@@ -11,53 +11,29 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 moveInput;
     public bool isPlayerOne = true;
+   
+    //shooting settings and timer
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
-
-
-
+    [SerializeField] private int maxAmmoPlayer1 = 3;
+    [SerializeField] private int maxAmmoPlayer2 = 3;
+    private int maxAmmo;
+    private int currentAmmo;
+    private bool isRecharging = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        maxAmmo = isPlayerOne ? maxAmmoPlayer1 : maxAmmoPlayer2;
+        currentAmmo = maxAmmo;
+
         //getting players rigidbody
         rb = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-
-        // Controller movement support
-        if (Gamepad.current != null) // make sure a controller is connected
-        {
-            if (isPlayerOne)
-            {
-                // Left stick for Player 1
-                moveInput = Gamepad.current.leftStick.ReadValue();
-            }
-            else
-            {
-                // Right stick for Player 2
-                moveInput = Gamepad.current.rightStick.ReadValue();
-            }
-
-            //had chatgpt help with getting keyboard support to work simultaneously with controller
-            if (isPlayerOne)
-            {
-                moveInput += new Vector2(
-                    (Keyboard.current.dKey.isPressed ? 1 : 0) - (Keyboard.current.aKey.isPressed ? 1 : 0),
-                    (Keyboard.current.wKey.isPressed ? 1 : 0) - (Keyboard.current.sKey.isPressed ? 1 : 0));
-            }
-            else
-            {
-                moveInput += new Vector2(
-                    (Keyboard.current.lKey.isPressed ? 1 : 0) - (Keyboard.current.jKey.isPressed ? 1 : 0),
-                    (Keyboard.current.iKey.isPressed ? 1 : 0) - (Keyboard.current.kKey.isPressed ? 1 : 0));
-            }
-
-        }
-
         //moving the player when player inputs an action
         rb.linearVelocity = moveInput * moveSpeed;
 
@@ -67,27 +43,49 @@ public class PlayerController : MonoBehaviour
     public void Move(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
-        Debug.Log($"{gameObject.name} got input: {moveInput}");
     }
 
     // Firing a bullet prefab when appropriate fire button is performed
     public void Fire(InputAction.CallbackContext context)
     {
+        if (!context.started) return; // only trigger once per press
 
-        if (context.performed)
+        if (currentAmmo <= 0)
         {
-            //if player one flag is checked on fires right if not, left 
-            Vector2 direction = isPlayerOne ? Vector2.right : Vector2.left;
-
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
-
-            Bullet bulletScript = bullet.GetComponent<Bullet>();
-
-            bulletScript.Launch(direction);
-
-            //checking you is firing
-            //Debug.Log(isPlayerOne ? "P1 fire" : "P2 fire");
+            Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " has no ammo!");
+            return;
         }
+
+        Shoot();
+        currentAmmo--;
+        Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo left: " + currentAmmo);
+
+        if (!isRecharging)
+            StartCoroutine(RechargeAmmo(3f));
+    }
+
+    // when current ammo is less than max ammo start recharging ammo
+    private IEnumerator RechargeAmmo(float ammoRechargeTime)
+    {
+        isRecharging = true;
+
+        while (currentAmmo < maxAmmo)
+        {
+            yield return new WaitForSeconds(ammoRechargeTime);
+            currentAmmo++;
+            //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " fired at " + Time.time);
+        }
+
+        isRecharging = false; //stop rechargin when full
+    }
+
+    //to be called when firing a bullet and will fire in corrcet direction based on character
+    private void Shoot()
+    {
+        Vector2 direction = isPlayerOne ? Vector2.right : Vector2.left;
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+        bullet.GetComponent<Bullet>().Launch(direction);
+        Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo recharged: " + currentAmmo);
     }
 
     //When hit with a bullet tagged object player will be stunned for 5 seconds
@@ -106,4 +104,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(duration);
         moveSpeed = originalMoveSpeed; // restore
     }
+
+
+
 }
