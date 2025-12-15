@@ -8,6 +8,8 @@ TagManager:
   - Player1
   - Player2
   - Bullet
+  - Shield
+  - Potion
   layers:
   - Default
   - TransparentFX

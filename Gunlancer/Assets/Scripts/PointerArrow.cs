@@ -18,16 +18,15 @@ public class PointerArrow : MonoBehaviour
     void Update()
     {
 
-        // Convert world position to canvas position
+        //convert world position to canvas position
         Vector2 viewportPos = Camera.main.WorldToViewportPoint(player.position + offset);
         Vector2 canvasPos = new Vector2(
             (viewportPos.x - 0.5f) * canvasRect.sizeDelta.x,
-            (viewportPos.y - 0.5f) * canvasRect.sizeDelta.y
-        );
+            (viewportPos.y - 0.5f) * canvasRect.sizeDelta.y);
 
         rectTransform.anchoredPosition = canvasPos;
 
-        // Rotate arrow to point at target
+        //rotate arrow to point at target
         Vector2 direction = target.position - (player.position + offset); //getting targets direction
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg; //getting angle of target
         rectTransform.rotation = Quaternion.Euler(0, 0, angle - 90f); //adjusting arrow to point at target

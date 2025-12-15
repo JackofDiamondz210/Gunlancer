@@ -30,6 +30,20 @@ public class PlayerController : MonoBehaviour
     //bullet UI images
     public Image[] bulletUIImages;
 
+    //items buffs: potion being speed increase for 3 seconds and a sheild to block bullets for 3 seconds
+    [SerializeField] private float speedBoostMultiplier = 1.5f;
+    [SerializeField] private float powerUpDuration = 3f;
+
+    private Coroutine speedBoostCoroutine;
+    private Coroutine shieldCoroutine;
+
+    //shield check
+    private bool hasShield = false;
+
+    //setting up spriteRenderer to change players color when picking up item
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -41,6 +55,10 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
 
         UpdateBulletUI();
+        
+        //getting SpriteRenderer
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalColor = spriteRenderer.color;
 
     }
 
@@ -75,11 +93,12 @@ public class PlayerController : MonoBehaviour
         moveInput = context.ReadValue<Vector2>();
     }
 
-    // Firing a bullet prefab when appropriate fire button is performed
+    //firing a bullet prefab when appropriate fire button is performed
     public void Fire(InputAction.CallbackContext context)
     {
         if (!context.started) return; // only trigger once per press
 
+        //no ammo
         if (currentAmmo <= 0)
         {
             //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " has no ammo!");
@@ -100,7 +119,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    // when current ammo is less than max ammo start recharging ammo
+    //when current ammo is less than max ammo start recharging ammo
     private IEnumerator RechargeAmmo(float ammoRechargeTime)
     {
         isRecharging = true;
@@ -126,16 +145,92 @@ public class PlayerController : MonoBehaviour
         //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo recharged: " + currentAmmo);
     }
 
-    //When hit with a bullet tagged object player will be stunned for 5 seconds
+    //when hit with a bullet tagged object player will be stunned for 5 seconds
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
+            if (hasShield)
+            {
+                Destroy(collision.gameObject); // shield blocks bullet
+                return;
+            }
+
             StartCoroutine(DisableMovement(5f));
+            Destroy(collision.gameObject);
         }
     }
 
-    // Will stop players movement for 5 seconds 
+    //when player collides an trigger game object with specific tag: it will give a specific buff
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //triggering speed potion effect
+        if (collision.CompareTag("Potion"))
+        {
+            ApplySpeedBoost();
+            Destroy(collision.gameObject);
+        }
+
+        //triggering shield effect
+        if (collision.CompareTag("Shield"))
+        {
+            ApplyShield();
+            Destroy(collision.gameObject);
+        }
+    }
+
+    //applying speed boost
+    private void ApplySpeedBoost()
+    {
+        //stop stacking
+        if (speedBoostCoroutine != null)
+        {
+            StopCoroutine(speedBoostCoroutine);
+        }
+
+        speedBoostCoroutine = StartCoroutine(SpeedBoost());
+    }
+
+    //applying shield buff with duration
+    private void ApplyShield()
+    {
+        //stop stacking
+        if (shieldCoroutine != null)
+        {
+            StopCoroutine(shieldCoroutine);
+        }
+
+        shieldCoroutine = StartCoroutine(Shield());
+    }
+
+    //durations for potion and shield both 3 seconds from private float
+    private IEnumerator SpeedBoost()
+    {
+        //chaning movespeed and color
+        moveSpeed = originalMoveSpeed * speedBoostMultiplier;
+        spriteRenderer.color = Color.green;
+
+        yield return new WaitForSeconds(powerUpDuration);
+
+        //return to normal
+        moveSpeed = originalMoveSpeed;
+        spriteRenderer.color = originalColor;
+    }
+
+    private IEnumerator Shield()
+    {
+        //changing shield bool to true and changing color
+        hasShield = true;
+        spriteRenderer.color = Color.yellow;
+
+        yield return new WaitForSeconds(powerUpDuration);
+
+        //return to normal
+        hasShield = false;
+        spriteRenderer.color = originalColor;
+    }
+
+    //will stop players movement for 5 seconds 
     private IEnumerator DisableMovement(float duration)
     {
         moveSpeed = 0;
@@ -157,12 +252,14 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
+        //giving back original MoveSpeed
         moveSpeed = originalMoveSpeed;
 
         if (stunTimerText != null)
             stunTimerText.gameObject.SetActive(false);
     }
 
+    //updating bullet UI
     private void UpdateBulletUI()
     {
 
