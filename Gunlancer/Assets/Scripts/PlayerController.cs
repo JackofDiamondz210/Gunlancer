@@ -1,34 +1,47 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    //getting settings for player movement and rigidbody, flag for player one, and setting up firing for player 1 and 2
+    //setting up player settings: movespeed, checking player 1 vs player 2, rigidbodies, move inputs
     [SerializeField] private float moveSpeed = 10f;
     private float originalMoveSpeed = 10f;
     private Rigidbody2D rb;
     private Vector2 moveInput;
     public bool isPlayerOne = true;
    
-    //shooting settings and timer
+    //shooting and ammo settings and bool to control ammo recharge
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
     [SerializeField] private int maxAmmoPlayer1 = 3;
     [SerializeField] private int maxAmmoPlayer2 = 3;
     private int maxAmmo;
-    private int currentAmmo;
+    public int currentAmmo;
     private bool isRecharging = false;
+
+    //text for stun timer
+    [SerializeField] private TMP_Text stunTimerText;
+    [SerializeField] private Canvas canvas;
+
+    //bullet UI images
+    public Image[] bulletUIImages;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //making sure player 1 and 2 ammo are seperate
         maxAmmo = isPlayerOne ? maxAmmoPlayer1 : maxAmmoPlayer2;
         currentAmmo = maxAmmo;
 
         //getting players rigidbody
         rb = GetComponent<Rigidbody2D>();
+
+        UpdateBulletUI();
+
     }
 
     // Update is called once per frame
@@ -37,6 +50,23 @@ public class PlayerController : MonoBehaviour
         //moving the player when player inputs an action
         rb.linearVelocity = moveInput * moveSpeed;
 
+    }
+
+    //LateUpdate is called after all updates
+    void LateUpdate()
+    {
+        
+        if (stunTimerText.gameObject.activeSelf)
+        {
+            Vector3 offset = new Vector3(1f, -1, 0); //manually setting effset position below players
+            Vector3 worldPos = transform.position + offset; //get pos with offset
+
+            // Convert world position to screen point
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+            // Set the UI text position
+            stunTimerText.transform.position = screenPos;
+        }
     }
 
     // moving the player appropriatly with input action
@@ -52,16 +82,22 @@ public class PlayerController : MonoBehaviour
 
         if (currentAmmo <= 0)
         {
-            Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " has no ammo!");
+            //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " has no ammo!");
             return;
         }
 
+        //shooting and removing a bullet
         Shoot();
         currentAmmo--;
-        Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo left: " + currentAmmo);
+        UpdateBulletUI();
+
+        //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo left: " + currentAmmo);
 
         if (!isRecharging)
+        {
             StartCoroutine(RechargeAmmo(3f));
+        }
+
     }
 
     // when current ammo is less than max ammo start recharging ammo
@@ -71,8 +107,10 @@ public class PlayerController : MonoBehaviour
 
         while (currentAmmo < maxAmmo)
         {
+            //adding a bullet back
             yield return new WaitForSeconds(ammoRechargeTime);
             currentAmmo++;
+            UpdateBulletUI();
             //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " fired at " + Time.time);
         }
 
@@ -84,8 +122,8 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 direction = isPlayerOne ? Vector2.right : Vector2.left;
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
-        bullet.GetComponent<Bullet>().Launch(direction);
-        Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo recharged: " + currentAmmo);
+        bullet.GetComponent<Bullet>().Launch(direction, isPlayerOne);
+        //Debug.Log((isPlayerOne ? "Player 1" : "Player 2") + " ammo recharged: " + currentAmmo);
     }
 
     //When hit with a bullet tagged object player will be stunned for 5 seconds
@@ -101,10 +139,37 @@ public class PlayerController : MonoBehaviour
     private IEnumerator DisableMovement(float duration)
     {
         moveSpeed = 0;
-        yield return new WaitForSeconds(duration);
-        moveSpeed = originalMoveSpeed; // restore
+
+        if (stunTimerText != null)
+        {
+            stunTimerText.gameObject.SetActive(true);
+        }
+
+        float remainingTime = duration;
+        while (remainingTime > 0)
+        {
+            if (stunTimerText != null)
+            {
+                stunTimerText.text = remainingTime.ToString("F1") + "s";
+            }
+
+            remainingTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        moveSpeed = originalMoveSpeed;
+
+        if (stunTimerText != null)
+            stunTimerText.gameObject.SetActive(false);
     }
 
+    private void UpdateBulletUI()
+    {
 
+        for (int i = 0; i < bulletUIImages.Length; i++)
+        {
+            bulletUIImages[i].enabled = i < currentAmmo;
+        }
+    }
 
 }
