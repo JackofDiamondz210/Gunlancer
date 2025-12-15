@@ -1317,7 +1317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -70}
+  m_AnchoredPosition: {x: 0, y: -130}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1222939691
@@ -1340,18 +1340,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Movement:
-
-    player 1: W A S D + left shift(shoot) or left JS + left
-    trigger(shoot)
-
-    player 2: I J K L + right shift(shoot) or right JS + right
-    trigger(shoot)
-
-    If you get hit you will be stunned for 5 seconds
-
-    Get
-    to your side to win!'
+  m_text: "Movement:\nplayer 1: W A S D + left shift(shoot) or left JS + left trigger(shoot)\nplayer
+    2: I J K L + right shift(shoot) or right JS + right trigger(shoot)\nIf you get
+    hit you will be stunned for 5 seconds\nThere are green speed potions and a yellow
+    shield potions\n that spawn with effects that last 5 seconds\nGet to your side
+    to win!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5b43e5b999d2d204d960854eeea50c74, type: 2}
   m_sharedMaterial: {fileID: 8123966162855733751, guid: 5b43e5b999d2d204d960854eeea50c74, type: 2}

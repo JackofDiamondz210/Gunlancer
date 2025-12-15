@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
 
     //items buffs: potion being speed increase for 3 seconds and a sheild to block bullets for 3 seconds
     [SerializeField] private float speedBoostMultiplier = 1.5f;
-    [SerializeField] private float powerUpDuration = 3f;
+    [SerializeField] private float powerUpDuration = 5f;
 
     private Coroutine speedBoostCoroutine;
     private Coroutine shieldCoroutine;
