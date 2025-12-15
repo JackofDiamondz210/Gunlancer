@@ -155,7 +155,7 @@ public class PlayerController : MonoBehaviour
                 Destroy(collision.gameObject); // shield blocks bullet
                 return;
             }
-
+            bool isStunned = true;
             StartCoroutine(DisableMovement(5f));
             Destroy(collision.gameObject);
         }
@@ -225,7 +225,6 @@ public class PlayerController : MonoBehaviour
 
         yield return new WaitForSeconds(powerUpDuration);
 
-        //return to normal
         hasShield = false;
         spriteRenderer.color = originalColor;
     }
